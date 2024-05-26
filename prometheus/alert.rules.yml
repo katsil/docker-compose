@@ -1,0 +1,49 @@
+groups:
+- name: flask-app-alerts
+  rules:
+  - alert: HighResponseTime
+    expr: (rate(request_processing_seconds_sum[5m]) / rate(request_processing_seconds_count[5m])) > 0.5
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High response time for Flask application"
+      description: "The response time is above 0.5 seconds for more than 5 minutes."
+
+  - alert: InstanceDown
+    expr: up{job="flask-app"} == 0
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Instance down"
+      description: "The Flask application instance is down."
+
+- name: nginx-alerts
+  rules:
+  - alert: NginxDown
+    expr: up{job="nginx-exporter"} == 0
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Nginx is down"
+      description: "The Nginx instance is down."
+
+  - alert: HighNginxConnections
+    expr: nginx_connections > 100
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High number of Nginx connections"
+      description: "Nginx connections are above 100 for more than 5 minutes."
+
+  - alert: NginxServerErrors
+    expr: rate(nginx_http_requests_total{}[5m]) > 1
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: "High rate of Nginx server errors"
+      description: "Nginx is experiencing a high rate of 5xx server errors."
